@@ -1,49 +1,120 @@
 # GAN-based Image Generation
 
-A beginner-friendly Generative Adversarial Network project that trains a Deep Convolutional GAN (DCGAN) with PyTorch to create synthetic RGB images.
+A beginner-friendly Generative Adversarial Network project that trains a Deep Convolutional GAN (DCGAN) with PyTorch to generate synthetic RGB images.
 
-The project uses the open CIFAR-10 dataset and contains notebook-based training/evaluation plus a small Flask web app for generating images from random latent noise.
+The project uses the open-source CIFAR-10 dataset and provides notebook-based training and inference workflows along with a Flask web application for interactive image generation.
 
 ## Project Highlights
 
-- GAN architecture with a **Generator** and **Discriminator**
-- PyTorch implementation
-- CIFAR-10 dataset through `torchvision`
-- Notebook-first workflow for learning and demonstration
-- Fixed-noise samples to visualize training progress
-- Saved Generator checkpoint for the web application
-- Flask interface for generating a grid of synthetic images
-- LinkedIn and GitHub links included in the web app
-- Simple repository structure with no `src/`, preprocessing modules, or extra Python modules
-
-The architecture follows the core DCGAN ideas described in the PyTorch DCGAN tutorial: convolutional layers in the discriminator, transposed convolutions in the generator, batch normalization, LeakyReLU/ReLU activations, and Tanh output normalization.
+* GAN architecture with a Generator and Discriminator
+* PyTorch implementation
+* CIFAR-10 dataset through `torchvision`
+* DCGAN-style convolutional architecture
+* Notebook-based training workflow
+* Notebook-based image generation demo
+* Generator and Discriminator model checkpoints
+* Generated image samples
+* GAN training loss visualization
+* Flask web application
+* Interactive synthetic image generation
+* GitHub and LinkedIn profile links in the web app
+* Simple repository structure
+* No `src/` directory
+* No separate preprocessing modules
+* No unnecessary utility or configuration modules
 
 ## Dataset
 
-This project uses **CIFAR-10**, which contains 60,000 32×32 RGB images across 10 classes. The dataset is downloaded automatically by `torchvision` when the first notebook is executed.
+This project uses the **CIFAR-10** dataset.
 
-CIFAR-10 is used here as a compact, practical dataset for learning GAN training rather than as a claim that the model produces photorealistic high-resolution images.
+CIFAR-10 contains 60,000 32×32 RGB images divided into 10 classes. The dataset is downloaded automatically through `torchvision` when the training notebook is executed.
+
+CIFAR-10 is intentionally used as a compact dataset for demonstrating GAN training and image generation.
+
+## How the GAN Works
+
+The project contains two neural networks:
+
+### Generator
+
+The Generator receives a random latent vector and transforms it into a synthetic RGB image.
+
+The Generator progressively increases the spatial resolution of the input using transposed convolution layers.
+
+```text
+Random Latent Vector
+        ↓
+Generator
+        ↓
+Synthetic 32×32 RGB Image
+```
+
+### Discriminator
+
+The Discriminator receives both real CIFAR-10 images and generated images.
+
+Its objective is to determine whether an image is real or generated.
+
+```text
+Real Image ──────────┐
+                     ├──→ Discriminator → Real / Fake
+Generated Image ─────┘
+```
+
+During training, the Generator attempts to produce increasingly realistic images while the Discriminator learns to distinguish generated images from real training examples.
+
+## DCGAN Architecture
+
+The project follows the main ideas of a Deep Convolutional GAN.
+
+### Generator
+
+```text
+100 × 1 × 1
+     ↓
+512 × 4 × 4
+     ↓
+256 × 8 × 8
+     ↓
+128 × 16 × 16
+     ↓
+64 × 32 × 32
+     ↓
+3 × 32 × 32
+```
+
+The final Generator layer uses `Tanh`, while the training images are normalized to approximately `[-1, 1]`.
+
+### Discriminator
+
+The Discriminator progressively reduces the spatial dimensions of the input image and produces a single output representing its real/fake prediction.
 
 ## Repository Structure
 
 ```text
 GAN-based-Image-Generation/
 │
+├── generated/
+│   ├── final_generated_samples.png
+│   ├── inference_samples.png
+│   ├── .gitkeep
+│   └── README.md
+│
+├── models/
+│   ├── generator.pth
+│   ├── discriminator.pth
+│   ├── .gitkeep
+│   └── README.md
+│
 ├── notebooks/
 │   ├── 01_GAN_Training.ipynb
 │   └── 02_GAN_Generation_Demo.ipynb
 │
-├── models/
-│   └── README.md
-│
-├── generated/
-│   └── README.md
+├── static/
+│   └── style.css
 │
 ├── templates/
 │   └── index.html
-│
-├── static/
-│   └── style.css
 │
 ├── app.py
 ├── requirements.txt
@@ -53,45 +124,49 @@ GAN-based-Image-Generation/
 └── README.md
 ```
 
-> The trained model files are intentionally not included in the source repository archive. Run the training notebook first; it creates the Generator checkpoint required by the Flask app.
+## File Description
 
-## How the GAN Works
+| File / Directory                         | Purpose                                            |
+| ---------------------------------------- | -------------------------------------------------- |
+| `notebooks/01_GAN_Training.ipynb`        | Complete GAN training workflow                     |
+| `notebooks/02_GAN_Generation_Demo.ipynb` | Loads the trained Generator and creates new images |
+| `models/generator.pth`                   | Trained Generator checkpoint                       |
+| `models/discriminator.pth`               | Trained Discriminator checkpoint                   |
+| `generated/final_generated_samples.png`  | Final generated samples from GAN training          |
+| `generated/inference_samples.png`        | Samples generated during inference                 |
+| `app.py`                                 | Flask web application                              |
+| `templates/index.html`                   | Web application interface                          |
+| `static/style.css`                       | Web application styling                            |
+| `models/README.md`                       | Model checkpoint information                       |
+| `generated/README.md`                    | Generated image information                        |
+| `CONTRIBUTING.md`                        | Contribution guidelines                            |
+| `CHANGELOG.md`                           | Project change history                             |
+| `requirements.txt`                       | Python dependencies                                |
+| `.gitignore`                             | Git ignore configuration                           |
 
-The model contains two neural networks:
+## Requirements
 
-**Generator**
+Use Python **3.11 or 3.12**.
 
-Takes a random latent vector and attempts to transform it into an image that looks like it came from the training dataset.
-
-**Discriminator**
-
-Receives either a real CIFAR-10 image or a generated image and learns to distinguish between real and generated samples.
-
-Training alternates between improving the discriminator and improving the generator. As training progresses, the generator attempts to produce samples that the discriminator cannot easily distinguish from real images.
-
-## Notebook Workflow
-
-### 1. Install dependencies
-
-Use Python 3.11 or 3.12.
+Create a virtual environment:
 
 ```bash
 python -m venv .venv
 ```
 
-Windows:
+### Windows
 
 ```bash
 .venv\Scripts\activate
 ```
 
-Then:
+### Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Train the GAN
+## Train the GAN
 
 Open:
 
@@ -99,25 +174,32 @@ Open:
 notebooks/01_GAN_Training.ipynb
 ```
 
-Run the notebook from top to bottom.
+Run the notebook from beginning to end.
 
-The notebook:
+The notebook will:
 
-1. Imports PyTorch and torchvision.
-2. Downloads CIFAR-10.
-3. Normalizes images to `[-1, 1]`.
-4. Defines the Generator.
-5. Defines the Discriminator.
-6. Initializes model weights.
-7. Trains the GAN.
-8. Records Generator and Discriminator losses.
-9. Saves generated sample grids.
-10. Saves the Generator checkpoint into `models/generator.pth`.
-11. Saves the Discriminator checkpoint into `models/discriminator.pth`.
+1. Import the required libraries.
+2. Download the CIFAR-10 dataset.
+3. Normalize the images.
+4. Create the Generator.
+5. Create the Discriminator.
+6. Initialize the model weights.
+7. Configure the loss function and optimizers.
+8. Train the GAN.
+9. Track Generator and Discriminator losses.
+10. Generate fixed-noise samples during training.
+11. Save the trained Generator.
+12. Save the trained Discriminator.
+13. Save final generated image samples.
 
-For a first run on a CPU, use the smaller epoch setting in the notebook. A CUDA-capable GPU is strongly recommended for longer training.
+After training, the following model files are available:
 
-### 3. Generate images in a notebook
+```text
+models/generator.pth
+models/discriminator.pth
+```
+
+## Generate New Images
 
 Open:
 
@@ -125,80 +207,170 @@ Open:
 notebooks/02_GAN_Generation_Demo.ipynb
 ```
 
-This notebook loads the trained Generator and produces new images from randomly sampled latent vectors.
+This notebook loads:
 
-### 4. Run the Flask web app
+```text
+models/generator.pth
+```
 
-From the repository root:
+and generates new synthetic images using randomly sampled latent vectors.
+
+The generated inference output is saved as:
+
+```text
+generated/inference_samples.png
+```
+
+## Run the Flask Web App
+
+After training the GAN, run the application from the repository root:
 
 ```bash
 python app.py
 ```
 
-Open:
+Then open:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-The web page lets you choose how many images to generate and displays the resulting image grid.
+The web application allows you to select the number of images to generate and displays them as an image grid.
 
-The page also contains the project owner's GitHub and LinkedIn profiles:
+## Web Application
 
-- GitHub: https://github.com/InfinitePraveen
-- LinkedIn: https://www.linkedin.com/in/infinitepraveen/
+The Flask application provides a simple interface for demonstrating the trained GAN.
 
-## Important Note About the Generated Images
+It includes:
 
-CIFAR-10 images are only 32×32 pixels. Therefore, the generated samples are intended to demonstrate the GAN learning process and synthetic image generation rather than professional photorealistic image synthesis.
+* Number of images selection
+* Random latent noise generation
+* Generator inference
+* Generated image grid
+* CPU/CUDA device information
+* Error handling when the model checkpoint is missing
+* Project information
+* GitHub profile
+* LinkedIn profile
 
-For interviews, explain:
+### Profiles
 
-- why a GAN needs two competing networks,
-- how the latent vector is converted into an image,
-- how the discriminator provides a learning signal,
-- why GAN training can be unstable,
-- what mode collapse means,
-- why the losses should not be interpreted like ordinary classifier accuracy,
-- and how the same architecture could be scaled to a larger dataset.
+**GitHub**
+
+https://github.com/InfinitePraveen
+
+**LinkedIn**
+
+https://www.linkedin.com/in/infinitepraveen/
 
 ## Main Hyperparameters
 
-The notebook uses a practical DCGAN-style setup:
+| Parameter          |             Value |
+| ------------------ | ----------------: |
+| Latent Vector Size |               100 |
+| Image Size         |             32×32 |
+| Image Channels     |                 3 |
+| Batch Size         |               128 |
+| Learning Rate      |            0.0002 |
+| Adam Beta 1        |               0.5 |
+| Loss Function      | BCEWithLogitsLoss |
+| Optimizer          |              Adam |
 
-- Latent vector size: 100
-- Image size: 32×32
-- Channels: 3
-- Batch size: 128
-- Learning rate: 0.0002
-- Adam beta1: 0.5
-- Loss: Binary Cross Entropy with logits
-- Optimizer: Adam
+These parameters are intentionally kept simple and visible in the training notebook so the complete training process can be explained during an interview.
 
-These values are intentionally kept visible in the notebook so they can be explained during an interview.
+## Generated Samples
+
+The repository contains generated examples from the trained model:
+
+```text
+generated/final_generated_samples.png
+generated/inference_samples.png
+```
+
+These images demonstrate the output produced by the Generator after training.
+
+Because CIFAR-10 images are only 32×32 pixels, the generated samples are intended primarily to demonstrate the GAN learning process and synthetic image generation rather than high-resolution photorealistic image synthesis.
 
 ## Interview Discussion Points
 
-### Why GANs?
+This project can be used to demonstrate understanding of:
 
-GANs learn a data distribution without requiring class labels for the generation objective. The generator learns to synthesize samples while the discriminator learns to identify generated samples.
+* Generative Adversarial Networks
+* Generator and Discriminator architecture
+* DCGAN
+* Latent vectors
+* Transposed convolution
+* Convolutional neural networks
+* Batch normalization
+* ReLU and LeakyReLU
+* Tanh output normalization
+* BCEWithLogitsLoss
+* Adam optimization
+* Adversarial training
+* GAN training instability
+* Mode collapse
+* Generator vs Discriminator losses
+* Fixed latent vectors
+* Synthetic image generation
+* Model checkpointing
+* PyTorch inference
+* Flask deployment
 
-### Why DCGAN?
+## What Is Mode Collapse?
 
-DCGAN is a natural starting point for image generation because convolutional layers are well suited to spatial image structure.
+Mode collapse occurs when a GAN Generator learns to produce only a limited variety of outputs instead of representing the diversity present in the training data.
 
-### What happens if the discriminator becomes too strong?
+This is one of the important challenges to discuss when explaining GANs during an interview.
 
-The generator may receive weak or unhelpful gradients. GAN training therefore requires a balance between the two networks.
+## Why Use Fixed Noise?
 
-### What is mode collapse?
+The training notebook uses a fixed set of latent vectors to generate samples after each epoch.
 
-Mode collapse occurs when the generator produces limited varieties of samples instead of covering the diversity of the training distribution.
+This provides a consistent reference for visually observing how the Generator changes during training.
 
-### Why use a fixed noise batch?
+## Limitations
 
-A fixed latent batch provides a consistent visual reference during training, making it easier to see how generated images change from epoch to epoch.
+This project intentionally uses CIFAR-10 because it is relatively small and practical for experimentation.
+
+The main limitations are:
+
+* Generated images are only 32×32 pixels.
+* GAN training can be unstable.
+* Generated samples may contain artifacts.
+* Mode collapse can occur.
+* CPU training can be slow.
+* Results depend on training duration and hardware.
+
+## Future Improvements
+
+Possible extensions include:
+
+* Training for more epochs
+* Higher-resolution image generation
+* Larger datasets
+* Conditional GANs
+* Wasserstein GAN
+* WGAN-GP
+* Progressive image generation
+* Better evaluation metrics
+* Improved web interface
+* GPU-based training
+* Experiment tracking
 
 ## License
 
-This project is intended for educational and portfolio use. Check the dataset terms before redistributing dataset files.
+This project is intended for educational and portfolio purposes.
+
+Please check the applicable dataset terms before redistributing dataset files.
+
+## Author
+
+**Praveen Kumar**
+
+Data Science | Machine Learning | Deep Learning
+
+GitHub:
+https://github.com/InfinitePraveen
+
+LinkedIn:
+https://www.linkedin.com/in/infinitepraveen/
